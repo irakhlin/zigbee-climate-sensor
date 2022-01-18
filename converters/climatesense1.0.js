@@ -1,0 +1,39 @@
+const zigbeeHerdsmanConverters = require('zigbee-herdsman-converters');
+
+const exposes = zigbeeHerdsmanConverters.exposes;
+const ea = exposes.access;
+const e = exposes.presets;
+const fz = zigbeeHerdsmanConverters.fromZigbeeConverters;
+const tz = zigbeeHerdsmanConverters.toZigbeeConverters;
+
+const ptvo_switch = zigbeeHerdsmanConverters.findByDevice({modelID: 'ptvo.switch'});
+fz.legacy = ptvo_switch.meta.tuyaThermostatPreset;
+
+
+
+const device = {
+    zigbeeModel: ['ClimateSense 1.0'],
+    model: 'ClimateSense 1.0',
+    vendor: 'Ilya Rakhlin',
+    description: 'Ilyas ClimateSense v1.0 with SHT35 and autoBSL',
+    fromZigbee: [fz.ignore_basic_report, fz.ptvo_switch_analog_input, fz.on_off, fz.ptvo_multistate_action, fz.legacy.ptvo_switch_buttons,],
+    toZigbee: [tz.ptvo_switch_trigger, tz.ptvo_switch_analog_input, tz.on_off,],
+    exposes: [e.cpu_temperature().withProperty('temperature').withEndpoint('l2'),
+      e.temperature().withEndpoint('l4'),
+      e.humidity().withEndpoint('l4'),
+      e.switch().withEndpoint('l6'),
+      e.action(['single', 'double', 'triple', 'hold', 'release']),
+],
+    meta: {
+        multiEndpoint: true,
+        
+    },
+    endpoint: (device) => {
+        return {
+            l2: 2, l4: 4, l6: 6, l1: 1,
+        };
+    },
+    icon: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pg0KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPg0KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCINCgkgdmlld0JveD0iMCAwIDQ0MS4xMjIgNDQxLjEyMiIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDQxLjEyMiA0NDEuMTIyOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8Zz4NCgk8Zz4NCgkJPGc+DQoJCQk8cGF0aCBkPSJNMjczLjc5NSwyNjguNTI2VjUzLjIzNUMyNzMuNzk1LDIzLjg4MSwyNDkuOTEzLDAsMjIwLjU1OSwwcy01My4yMzUsMjMuODgxLTUzLjIzNSw1My4yMzVWMjY4LjUzDQoJCQkJYy0yNi42MDksMTguMTgzLTQyLjMxMSw0OC45NjMtNDEuMjE4LDgxLjM0MWMxLjYzNiw0OC41NDIsNDAuODg3LDg4LjU2NCw4OS4zNTgsOTEuMTE1YzEuNzI2LDAuMDkxLDMuNDQ2LDAuMTM2LDUuMTU5LDAuMTM2DQoJCQkJYzI0LjMyNiwwLDQ3LjIzMS05LjEwNSw2NC45NzUtMjUuOTRjMTkuMDA1LTE4LjAzMSwyOS40NzEtNDIuMzgzLDI5LjQ3MS02OC41N0MzMTUuMDY4LDMxNS4wNjcsMjk5LjcyLDI4Ni4xODUsMjczLjc5NSwyNjguNTI2eg0KCQkJCSBNMjc1LjI3NCw0MDQuMjk5Yy0xNS45NzcsMTUuMTYtMzYuOTM3LDIyLjg3NS01OS4wMjEsMjEuNzA3Yy00MC43NjYtMi4xNDUtNzMuNzc4LTM1LjgxLTc1LjE1NS03Ni42NDENCgkJCQljLTAuOTU5LTI4LjQzNiwxMy40NzgtNTUuNDA5LDM3LjY3Ni03MC4zOTRjMi4yMDgtMS4zNjcsMy41NTEtMy43NzksMy41NTEtNi4zNzZWNTMuMjM1QzE4Mi4zMjQsMzIuMTUyLDE5OS40NzcsMTUsMjIwLjU2LDE1DQoJCQkJczM4LjIzNSwxNy4xNTIsMzguMjM1LDM4LjIzNXYyMTkuMzU5YzAsMi41OTcsMS4zNDQsNS4wMDksMy41NTIsNi4zNzZjMjMuNjIsMTQuNjI3LDM3LjcyMiwzOS45MTMsMzcuNzIyLDY3LjY0DQoJCQkJQzMwMC4wNjgsMzY4LjY0MiwyOTEuMjYzLDM4OS4xMjksMjc1LjI3NCw0MDQuMjk5eiIvPg0KCQkJPHBhdGggZD0iTTI4Ni44MTYsMzI1LjQ4Yy0xLjI1My0zLjk0OC01LjQ2OS02LjEzNC05LjQxNy00Ljg4MWMtMy45NDgsMS4yNTItNi4xMzQsNS40NjgtNC44ODIsOS40MTcNCgkJCQljMS42OTMsNS4zMzgsMi41NTIsMTAuOTIxLDIuNTUyLDE2LjU5NWMwLDE0LjU2MS01LjY3LDI4LjI1LTE1Ljk2NSwzOC41NDVjLTEwLjk5MiwxMC45OTQtMjUuODQyLDE2LjcxNy00MS41MzksMTUuODg0DQoJCQkJYy0yNy45MjUtMS40NjktNTAuNTM5LTI0LjUzOC01MS40ODItNTIuNTE4Yy0wLjY1OC0xOS41MDksOS4yNDgtMzguMDE1LDI1Ljg1MS00OC4yOTZsMTEuODM4LTcuMzMxDQoJCQkJYzIuMjA4LTEuMzY3LDMuNTUyLTMuNzc5LDMuNTUyLTYuMzc2VjY1aDI2LjQ3MXYyMjEuNTE5YzAsMi41OTcsMS4zNDQsNS4wMDksMy41NTEsNi4zNzZsMTEuODM4LDcuMzMxDQoJCQkJYzMuNTIzLDIuMTgxLDguMTQ1LDEuMDk0LDEwLjMyNS0yLjQyOGMyLjE4Mi0zLjUyMSwxLjA5NS04LjE0NC0yLjQyNy0xMC4zMjVsLTguMjg3LTUuMTMyVjU3LjVjMC00LjE0Mi0zLjM1Ny03LjUtNy41LTcuNQ0KCQkJCWgtNDEuNDcxYy00LjE0MiwwLTcuNSwzLjM1OC03LjUsNy41djIyNC44NDJsLTguMjg3LDUuMTMxYy0yMS4xNiwxMy4xMDMtMzMuNzg0LDM2LjY4OS0zMi45NDUsNjEuNTU0DQoJCQkJYzEuMjAzLDM1LjY5MSwzMC4wNTYsNjUuMTE4LDY1LjY4Nyw2Ni45OTJjMS4yNiwwLjA2NiwyLjUzMywwLjEsMy43ODcsMC4xYzE4LjU2NSwwLDM2LjAyLTcuMjI5LDQ5LjE0Ni0yMC4zNTcNCgkJCQljMTMuMTI4LTEzLjEyOSwyMC4zNTctMzAuNTg1LDIwLjM1Ny00OS4xNTJDMjkwLjA2OCwzMzkuMzk2LDI4OC45NzQsMzMyLjI4NywyODYuODE2LDMyNS40OHoiLz4NCgkJCTxwYXRoIGQ9Ik0yNjkuMDUzLDMxNS40MDljMS45ODcsMCwzLjg4LTAuODEzLDUuMy0yLjE5YzIuNzU3LTIuODQxLDIuOTI0LTcuMzgsMC4yNTEtMTAuMzQyDQoJCQkJYy0yLjMwOC0yLjU1OC02LjIxNC0zLjE4Ny05LjIxOS0xLjUwNmMtMy4wMjMsMS42OTItNC41MDgsNS4zNjItMy41MTcsOC42ODJDMjYyLjgwOCwzMTMuMjAxLDI2NS43NjIsMzE1LjQwOSwyNjkuMDUzLDMxNS40MDl6Ig0KCQkJCS8+DQoJCTwvZz4NCgk8L2c+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8L3N2Zz4NCg==',
+};
+
+module.exports = device;
